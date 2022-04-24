@@ -25,6 +25,11 @@ import com.serotonin.mango.view.text.TextRenderer;
  * @author Matthew Lohbihler
  */
 public class ReportPointInfo {
+    // public enum ChartType {
+    //         LINE,
+    //         SCATTER
+    //     }
+
     private int reportPointId;
     private String deviceName;
     private String pointName;
@@ -33,6 +38,65 @@ public class ReportPointInfo {
     private TextRenderer textRenderer;
     private String colour;
     private boolean consolidatedChart;
+
+    private String xLabel;
+    private String yLabel;
+    private String title;
+    // private ChartType type;
+    private String type;
+    private double yReference;
+
+    public void setChartType(String newType) {
+        this.type = newType;
+    }
+
+    public void setType(String newType) {
+        this.type = newType;
+    }
+
+    public String getChartType() {
+        return this.type;
+    }
+
+    // public void setChartType(ChartType newType) {
+    //     this.type = newType;
+    // }
+
+    // public ChartType getChartType() {
+    //     return this.type;
+    // }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String newLabel) {
+        this.title = newLabel;
+    }
+
+    public String getXLabel() {
+        return xLabel;
+    }
+
+    public void setXLabel(String newLabel) {
+        this.xLabel = newLabel;
+    }
+
+    public String getYLabel() {
+        return yLabel;
+    }
+
+    public void setYLabel(String newLabel) {
+        this.yLabel = newLabel;
+    }
+
+    public double getYReference() {
+        return yReference;
+    }
+
+    public void setYReference(double newReference) {
+        this.yReference = newReference;
+    }
 
     public String getExtendedName() {
         return deviceName + " - " + pointName;

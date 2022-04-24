@@ -1649,6 +1649,12 @@ publisherList.config=Configuration
 publisherList.status=status
 publisherList.noRows=No rows
 
+reports.chartType=Chart Type
+reports.xLabel=X Axis Label
+reports.yLabel=Y Axis Label
+reports.yReference=Y Reference Line
+reports.title=Title
+
 reports.recipTestEmailMessage=This message was sent as a test of a report's email recipient list
 reports.emailRecipients=Email recipients
 reports.export=Export data

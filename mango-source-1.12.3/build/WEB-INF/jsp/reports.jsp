@@ -74,8 +74,7 @@
         $set("name", report.name);
         reportPointsArray = new Array();
         for (var i=0; i<report.points.length; i++)
-            addToReportPointsArray(report.points[i].pointId, report.points[i].colour,
-                    report.points[i].consolidatedChart);
+            addToReportPointsArray(report.points[i].pointId, report.points[i].colour, report.points[i].consolidatedChart, report.points[i].yReference, report.points[i].yLabel, report.points[i].xLabel, report.points[i].title);                                    //add arugments for new columns
         $set("includeEvents", report.includeEvents);
         $set("includeUserComments", report.includeUserComments);
         $set("dateRangeType", report.dateRangeType);
@@ -124,12 +123,16 @@
         writeReportPointsArray();
     }
     
-    function addToReportPointsArray(pointId, colour, consolidatedChart) {
+    function addToReportPointsArray(pointId, colour, consolidatedChart, yReference, yLabel, xLabel, title) {
         var data = getPointData(pointId);
         if (data) {
             // Missing names imply that the point was deleted, so ignore.
             reportPointsArray[reportPointsArray.length] = {
                 pointId: pointId,
+                yReference : !yReference ? (!data.yReference ? "" : data.yReference) : yReference,
+                yLabel : !yLabel ? (!data.yLabel ? "" : data.yLabel) : yLabel,
+                xLabel : !xLabel ? (!data.xLabel ? "" : data.xLabel) : xLabel,
+                title : !title ? (!data.title ? "" : data.title) : title,
                 pointName : data.name,
                 pointType : data.dataTypeMessage,
                 colour : !colour ? (!data.chartColour ? "" : data.chartColour) : colour,
@@ -167,6 +170,25 @@
                         return "<input type='checkbox'"+ (data.consolidatedChart ? " checked='checked'" : "") +
                                 " onclick='updatePointConsolidatedChart("+ data.pointId +", this.checked)'/>";
                     },
+                    function(data) {
+                        return "<select id='chartTypeList' onchange='updateChartType(" + data.pointId + ", value)'> <option value='0'>Scatter Plot</option> <option value='1'>Line Graph</option> </select>";
+                    },
+                    function(data) {
+                    	    return "<input type='text' maxLength='16' value='"+ data.title +"' "+
+                    	            "onblur='updatePointTitle("+ data.pointId +", this.value)'/>";
+                    },
+                    function(data) {
+                    	    return "<input type='text' maxLength='16' value='"+ data.xLabel +"' "+
+                    	            "onblur='updatePointxLabel("+ data.pointId +", this.value)'/>";
+                    },
+                    function(data) {
+                    	    return "<input type='text' maxLength='16' value='"+ data.yLabel +"' "+
+                    	            "onblur='updatePointyLabel("+ data.pointId +", this.value)'/>";
+                    },
+                    function(data) {
+                    	    return "<input type='number' maxlength='16' value='"+ data.yReference +"' "+
+                    	            "onblur='updatePointyReference("+ data.pointId +", this.value)'/>";
+                    },
                     function(data) { 
                             return "<img src='images/bullet_delete.png' class='ptr' "+
                                     "onclick='removeFromReportPointsArray("+ data.pointId +")'/>";
@@ -187,6 +209,40 @@
                 });
         }
         updatePointsList();
+    }
+
+    function updateChartType(pointId, value) {
+      var item = getElement(reportPointsArray, pointId, "pointId");
+    	if (item) {
+    		item["type"] = value;
+      }
+    }
+
+    function updatePointyReference(pointId, reference) {
+    	var item = getElement(reportPointsArray, pointId, "pointId");
+    	if (item)
+    		item["yReference"] = reference;
+    }
+
+    function updatePointyLabel(pointId, label) {
+    	var item = getElement(reportPointsArray, pointId, "pointId");
+    	if (item)
+    		item["yLabel"] = label;
+    }
+
+    function updatePointxLabel(pointId, label) {
+    	var item = getElement(reportPointsArray, pointId, "pointId");
+    	if (item)
+    		item["xLabel"] = label;
+    }
+
+    function updatePointTitle(pointId, title) {
+    	var item = getElement(reportPointsArray, pointId, "pointId");
+    	if (item) {
+    		item["title"] = title;
+        //item["type"] = "Line Graph";
+      }
+
     }
     
     function updatePointColour(pointId, colour) {
@@ -395,9 +451,11 @@
     
     function getReportPointIdsArray() {
         var points = new Array();
-        for (var i=0; i<reportPointsArray.length; i++)
-            points[points.length] = { pointId: reportPointsArray[i].pointId, colour: reportPointsArray[i].colour,
-        		    consolidatedChart: reportPointsArray[i].consolidatedChart };
+        for (var i=0; i<reportPointsArray.length; i++) {
+            points[points.length] = { pointId: reportPointsArray[i].pointId, colour: reportPointsArray[i].colour, consolidatedChart: reportPointsArray[i].consolidatedChart, xLabel: reportPointsArray[i].xLabel, title: reportPointsArray[i].title, 
+                yLabel: reportPointsArray[i].yLabel, yReference: reportPointsArray[i].yReference, type: reportPointsArray[i].type};
+            }
+
         return points;
     }
     
@@ -471,13 +529,13 @@
     function runReport() {
         if (hasImageFader("runImg"))
             return;
-        
+            
         ReportsDwr.runReport($get("name"), getReportPointIdsArray(), $get("includeEvents"),
                 $get("includeUserComments"), $get("dateRangeType"), $get("relativeType"), $get("prevPeriodCount"),
                 $get("prevPeriodType"), $get("pastPeriodCount"), $get("pastPeriodType"), $get("fromNone"),
                 $get("fromYear"), $get("fromMonth"), $get("fromDay"), $get("fromHour"), $get("fromMinute"),
                 $get("toNone"), $get("toYear"), $get("toMonth"), $get("toDay"), $get("toHour"), $get("toMinute"),
-                $get("email"), $get("includeData"), $get("zipData"), emailRecipients.createRecipientArray(), function(response) {
+                $get("email"), $get("includeData"), $get("zipData"),  emailRecipients.createRecipientArray(), function(response) {
             stopImageFader("runImg");
             clearMessages();
             
@@ -588,10 +646,15 @@
                   </tbody>
                   <tbody id="reportPointsTableHeaders" style="display:none;">
                     <tr class="smRowHeader">
-                      <td><fmt:message key="reports.pointName"/></td>
+                      <td><fmt:message key="reports.pointName"/>>></td>
                       <td><fmt:message key="reports.dataType"/></td>
                       <td><fmt:message key="reports.colour"/></td>
                       <td><fmt:message key="reports.consolidatedChart"/></td>
+                      <td><fmt:message key="reports.chartType"/></td>
+                      <td><fmt:message key="reports.title"/></td>
+                      <td><fmt:message key="reports.xLabel"/></td>
+                      <td><fmt:message key="reports.yLabel"/></td>
+                      <td><fmt:message key="reports.yReference"/></td>
                       <td></td>
                     </tr>
                   </tbody>

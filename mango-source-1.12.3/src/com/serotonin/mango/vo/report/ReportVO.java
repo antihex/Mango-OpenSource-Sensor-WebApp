@@ -81,6 +81,12 @@ public class ReportVO implements Serializable {
     private int runDelayMinutes;
     private String scheduleCron;
 
+    // private String title;
+    // private String xLabel;
+    // private String yLabel;
+    // private double yReference;
+    // private ChartType type;
+
     private boolean email;
     private List<RecipientListEntryBean> recipients = new ArrayList<RecipientListEntryBean>();
     private boolean includeData = true;
@@ -102,6 +108,46 @@ public class ReportVO implements Serializable {
         fromHour = dt.getHourOfDay();
         fromMinute = dt.getMinuteOfHour();
     }
+
+    // public void setChartType(ChartType newType) {
+    //     this.type = newType;
+    // }
+
+    // public ChartType getChartType() {
+    //     return this.type;
+    // }
+
+    // public String getTitle() {
+    //     return title;
+    // }
+
+    // public void setTitle(String newLabel) {
+    //     this.title = newLabel;
+    // }
+
+    // public String getXLabel() {
+    //     return xLabel;
+    // }
+
+    // public void setXLabel(String newLabel) {
+    //     this.xLabel = newLabel;
+    // }
+
+    // public String getYLabel() {
+    //     return yLabel;
+    // }
+
+    // public void setYLabel(String newLabel) {
+    //     this.yLabel = newLabel;
+    // }
+
+    // public double getYReference() {
+    //     return yReference;
+    // }
+
+    // public void setYReference(double newReference) {
+    //     this.yReference = newReference;
+    // }
 
     public int getId() {
         return id;
