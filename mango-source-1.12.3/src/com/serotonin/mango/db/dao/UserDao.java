@@ -145,6 +145,8 @@ public class UserDao extends BaseDao {
             + "  receiveOwnAuditEvents=? " + "where id=?";
 
     void updateUser(User user) {
+        //System.out.println("User URL: " + user.getHomeUrl());
+        if(user.getHomeUrl() == null) user.setHomeUrl("");
         ejt.update(
                 USER_UPDATE,
                 new Object[] { user.getUsername(), user.getPassword(), user.getEmail(), user.getPhone(),

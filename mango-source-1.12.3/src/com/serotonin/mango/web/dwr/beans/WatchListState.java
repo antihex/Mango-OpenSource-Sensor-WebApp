@@ -20,6 +20,8 @@ package com.serotonin.mango.web.dwr.beans;
 
 import com.serotonin.ShouldNeverHappenException;
 import com.serotonin.util.StringUtils;
+import java.io.*;
+
 
 public class WatchListState extends BasePointState {
     private String value;
@@ -38,7 +40,12 @@ public class WatchListState extends BasePointState {
     }
 
     public void setValue(String value) {
-        this.value = value;
+        double dvalue = Double.parseDouble(value); 
+	dvalue = dvalue * Math.pow(10, 2);
+	dvalue = Math.floor(dvalue);
+	dvalue = dvalue / Math.pow(10, 2);
+	value = String.valueOf(dvalue);
+	this.value = value;
     }
 
     @Override
