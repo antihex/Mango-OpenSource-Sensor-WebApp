@@ -147,7 +147,7 @@ public class ReportChartCreator {
             if (ptsc.hasData()) {
                 if (inlinePrefix != null)
                     model.put("chartName", inlinePrefix + pointStat.getChartName());
-                pointStat.setImageData(ImageChartUtils.getChartData(ptsc, POINT_IMAGE_WIDTH, POINT_IMAGE_HEIGHT));
+                pointStat.setImageData(ImageChartUtils.getChartData(ptsc, POINT_IMAGE_WIDTH, POINT_IMAGE_HEIGHT, pointStat.getTitle(), pointStat.getXLabel(), pointStat.getYLabel(), pointStat.getYReference(), pointStat.getChartType()));
             }
         }
 
@@ -161,7 +161,7 @@ public class ReportChartCreator {
                 model.put("chartName", IMAGE_SERVLET + chartName);
             }
 
-            imageData = ImageChartUtils.getChartData(ptsc, true, IMAGE_WIDTH, IMAGE_HEIGHT);
+            imageData = ImageChartUtils.getChartData(ptsc, true, IMAGE_WIDTH, IMAGE_HEIGHT, "", "", "", 0, "1");
         }
 
         List<EventInstance> events = null;
@@ -284,8 +284,67 @@ public class ReportChartCreator {
         private DiscreteTimeSeries discreteTimeSeries;
         private byte[] imageData;
 
+        private String title;
+        private String xLabel;
+        private String yLabel;
+        private double yReference;
+        // private ChartType type;
+        private String type;
+
         public PointStatistics(int reportPointId) {
             this.reportPointId = reportPointId;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public void setChartType(String newType) {
+            this.type = newType;
+        }
+
+        public String getChartType() {
+            return this.type;
+        }
+
+        // public void setChartType(ChartType newType) {
+        //     this.type = newType;
+        // }
+
+        // public ChartType getChartType() {
+        //     return this.type;
+        // }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String newLabel) {
+            this.title = newLabel;
+        }
+
+        public String getXLabel() {
+            return xLabel;
+        }
+
+        public void setXLabel(String newLabel) {
+            this.xLabel = newLabel;
+        }
+
+        public String getYLabel() {
+            return yLabel;
+        }
+
+        public void setYLabel(String newLabel) {
+            this.yLabel = newLabel;
+        }
+
+        public double getYReference() {
+            return yReference;
+        }
+
+        public void setYReference(double newReference) {
+            this.yReference = newReference;
         }
 
         public String getName() {
@@ -500,6 +559,13 @@ public class ReportChartCreator {
             if (pointInfo.getStartValue() != null)
                 point.setStartValue(pointInfo.getTextRenderer().getText(pointInfo.getStartValue(),
                         TextRenderer.HINT_FULL));
+
+            point.setTitle(pointInfo.getTitle());
+            point.setXLabel(pointInfo.getXLabel());
+            point.setYLabel(pointInfo.getYLabel());
+            point.setYReference(pointInfo.getYReference());
+            point.setChartType(pointInfo.getChartType());
+
             pointStatistics.add(point);
 
             Color colour = null;

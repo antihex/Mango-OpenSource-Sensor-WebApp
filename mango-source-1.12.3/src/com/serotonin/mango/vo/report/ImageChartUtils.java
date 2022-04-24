@@ -40,6 +40,12 @@ import org.jfree.data.time.Second;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.ui.TextAnchor;
+import org.jfree.chart.plot.ValueMarker;
+import org.jfree.chart.plot.Marker;
+
+import org.jfree.chart.plot.PlotOrientation;
+import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
 
 import com.serotonin.ShouldNeverHappenException;
 import com.serotonin.io.StreamUtils;
@@ -55,20 +61,18 @@ public class ImageChartUtils {
     private static final int NUMERIC_DATA_INDEX = 0;
     private static final int DISCRETE_DATA_INDEX = 1;
 
-    public static void writeChart(PointTimeSeriesCollection pointTimeSeriesCollection, OutputStream out, int width,
-            int height) throws IOException {
-        writeChart(pointTimeSeriesCollection, pointTimeSeriesCollection.hasMultiplePoints(), out, width, height);
+    public static void writeChart(PointTimeSeriesCollection pointTimeSeriesCollection, OutputStream out, int width, int height) throws IOException {
+        writeChart(pointTimeSeriesCollection, pointTimeSeriesCollection.hasMultiplePoints(), out, width, height, "", "", "", 0, "Line Graph");
     }
 
-    public static byte[] getChartData(PointTimeSeriesCollection pointTimeSeriesCollection, int width, int height) {
-        return getChartData(pointTimeSeriesCollection, pointTimeSeriesCollection.hasMultiplePoints(), width, height);
+    public static byte[] getChartData(PointTimeSeriesCollection pointTimeSeriesCollection, int width, int height, String title, String xLabel, String yLabel, double yReference, String type) {
+        return getChartData(pointTimeSeriesCollection, pointTimeSeriesCollection.hasMultiplePoints(), width, height, title, xLabel, yLabel, yReference, type);
     }
 
-    public static byte[] getChartData(PointTimeSeriesCollection pointTimeSeriesCollection, boolean showLegend,
-            int width, int height) {
+    public static byte[] getChartData(PointTimeSeriesCollection pointTimeSeriesCollection, boolean showLegend, int width, int height, String title, String xLabel, String yLabel, double yReference, String type) {
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            writeChart(pointTimeSeriesCollection, showLegend, out, width, height);
+            writeChart(pointTimeSeriesCollection, showLegend, out, width, height, title, xLabel, yLabel, yReference, type);
             return out.toByteArray();
         }
         catch (IOException e) {
@@ -76,25 +80,40 @@ public class ImageChartUtils {
         }
     }
 
-    public static void writeChart(PointTimeSeriesCollection pointTimeSeriesCollection, boolean showLegend,
-            OutputStream out, int width, int height) throws IOException {
-
-        JFreeChart chart = ChartFactory.createTimeSeriesChart(null, null, null, null, showLegend, false, false);
+    public static void writeChart(PointTimeSeriesCollection pointTimeSeriesCollection, boolean showLegend, OutputStream out, int width, int height, String title, String xLabel, String yLabel, double yReference, String type) throws IOException {
+        JFreeChart chart = ChartFactory.createTimeSeriesChart(title, xLabel, yLabel, null, showLegend, false, false);
+        //JFreeChart chart = ChartFactory.createScatterPlot(title, xLabel, yLabel, pointTimeSeriesCollection.getNumericTimeSeriesCollection(), PlotOrientation.VERTICAL, true, true, false);
         chart.setBackgroundPaint(SystemSettingsDao.getColour(SystemSettingsDao.CHART_BACKGROUND_COLOUR));
-
         XYPlot plot = chart.getXYPlot();
         plot.setBackgroundPaint(SystemSettingsDao.getColour(SystemSettingsDao.PLOT_BACKGROUND_COLOUR));
         Color gridlines = SystemSettingsDao.getColour(SystemSettingsDao.PLOT_GRIDLINE_COLOUR);
         plot.setDomainGridlinePaint(gridlines);
         plot.setRangeGridlinePaint(gridlines);
+        
+        //add reference line
+        if(yReference != 0) {
+            Marker marker = new ValueMarker(yReference);  // position is the value on the axis
+            marker.setPaint(Color.red);
+            plot.addRangeMarker(marker);
+        }
 
         double numericMin = 0;
         double numericMax = 1;
         if (pointTimeSeriesCollection.hasNumericData()) {
             //            XYSplineRenderer numericRenderer = new XYSplineRenderer();
             //            numericRenderer.setBaseShapesVisible(false);
-            XYLineAndShapeRenderer numericRenderer = new XYLineAndShapeRenderer(true, false);
 
+            Shape shape  = new Ellipse2D.Double(0,0,2,2);
+            System.out.println("Chart Type: " + type);
+
+            XYLineAndShapeRenderer numericRenderer;
+
+            if(type != null && type.equals("1")) {
+                numericRenderer = new XYLineAndShapeRenderer(true, false); //line
+            } else {
+                numericRenderer = new XYLineAndShapeRenderer(false, true); //scatter
+            }
+            
             plot.setDataset(NUMERIC_DATA_INDEX, pointTimeSeriesCollection.getNumericTimeSeriesCollection());
             plot.setRenderer(NUMERIC_DATA_INDEX, numericRenderer);
 
@@ -102,6 +121,7 @@ public class ImageChartUtils {
                 Paint paint = pointTimeSeriesCollection.getNumericPaint().get(i);
                 if (paint != null)
                     numericRenderer.setSeriesPaint(i, paint, false);
+                    numericRenderer.setSeriesShape(i, shape);
             }
 
             numericMin = plot.getRangeAxis().getLowerBound();
@@ -167,9 +187,8 @@ public class ImageChartUtils {
                 }
 
                 intervalIndex += dts.getDiscreteValueCount();
-            }
-        }
-
+            } 
+        } 
         // Return the image.
         ChartUtilities.writeChartAsPNG(out, chart, width, height);
     }
